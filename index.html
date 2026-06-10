@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Skills · Claude Code</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Inter:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/fuse.js@7/dist/fuse.min.js"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:       #f6f6f4;
+  --white:    #ffffff;
+  --border:   #e8e8e4;
+  --text-1:   #1a1a1a;
+  --text-2:   #4a4a4a;
+  --text-3:   #9a9a9a;
+  --accent:   #0f0f0f;
+  --blue:     #2563eb;
+  --blue-bg:  #eff6ff;
+  --blue-bd:  #bfdbfe;
+  --radius:   10px;
+  --font-mono: 'JetBrains Mono', monospace;
+  --font-sans: 'Inter', system-ui, sans-serif;
+}
+
+html { font-size: 14px; }
+body { background: var(--bg); color: var(--text-1); font-family: var(--font-sans); line-height: 1.5; min-height: 100vh; }
+
+/* ─── TOP BAR ─── */
+.topbar {
+  background: var(--white);
+  border-bottom: 1px solid var(--border);
+  padding: 0 40px;
+  display: flex;
+  align-items: center;
+  height: 52px;
+  gap: 24px;
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
+.logo {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-1);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.logo-sep { color: var(--text-3); margin: 0 2px; }
+
+.search-wrap {
+  flex: 1;
+  max-width: 360px;
+  position: relative;
+}
+
+.search-wrap svg {
+  position: absolute;
+  left: 11px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-3);
+  pointer-events: none;
+}
+
+#search {
+  width: 100%;
+  height: 34px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 0 12px 0 34px;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  color: var(--text-1);
+  outline: none;
+  transition: border-color .15s, background .15s;
+}
+#search::placeholder { color: var(--text-3); }
+#search:focus { background: var(--white); border-color: #aaa; }
+
+.tabs {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: auto;
+}
+
+.tab {
+  height: 28px;
+  padding: 0 11px;
+  font-family: var(--font-sans);
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--text-3);
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: color .12s, background .12s;
+  white-space: nowrap;
+}
+.tab:hover { color: var(--text-2); background: var(--bg); }
+.tab.active { color: var(--text-1); background: var(--bg); border: 1px solid var(--border); }
+
+/* ─── LAYOUT ─── */
+.layout {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  min-height: calc(100vh - 52px);
+}
+
+/* ─── SIDEBAR ─── */
+.sidebar {
+  padding: 28px 0;
+  border-right: 1px solid var(--border);
+  background: var(--white);
+  position: sticky;
+  top: 52px;
+  height: calc(100vh - 52px);
+  overflow-y: auto;
+}
+
+.sidebar-section { margin-bottom: 24px; }
+
+.sidebar-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-3);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  padding: 0 20px;
+  margin-bottom: 6px;
+}
+
+.sidebar-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 20px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-2);
+  cursor: pointer;
+  border-radius: 0;
+  transition: color .12s, background .12s;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+}
+.sidebar-item:hover { color: var(--text-1); background: var(--bg); }
+.sidebar-item.active { color: var(--text-1); background: #f0f0ec; }
+
+.sidebar-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.sidebar-item-left { display: flex; align-items: center; gap: 10px; }
+
+.count-pill {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-3);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1px 6px;
+}
+
+.legend-wrap {
+  padding: 16px 20px 0;
+  border-top: 1px solid var(--border);
+  margin-top: 8px;
+}
+
+.legend-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11.5px;
+  color: var(--text-3);
+  margin-bottom: 7px;
+}
+
+.legend-pip {
+  width: 3px;
+  height: 14px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+/* ─── CONTENT ─── */
+.content { padding: 32px 36px 64px; }
+
+.section { margin-bottom: 40px; }
+.section.hidden { display: none; }
+
+.section-head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.section-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-1);
+}
+
+.section-en {
+  font-size: 12px;
+  color: var(--text-3);
+  font-weight: 400;
+}
+
+.section-cnt {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-3);
+  margin-left: auto;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 10px;
+}
+
+/* ─── CARD ─── */
+.card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  position: relative;
+  transition: box-shadow .18s, border-color .18s, transform .18s;
+  cursor: default;
+}
+.card:hover {
+  box-shadow: 0 6px 20px rgba(0,0,0,.08);
+  border-color: #d4d4d0;
+  transform: translateY(-2px);
+}
+
+.card.self-made {
+  background: var(--blue-bg);
+  border-color: var(--blue-bd);
+}
+.card.self-made:hover {
+  border-color: #93c5fd;
+  box-shadow: 0 6px 20px rgba(37,99,235,.1);
+}
+
+.card.hidden { display: none; }
+
+.self-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--blue);
+  background: #dbeafe;
+  border: 1px solid var(--blue-bd);
+  border-radius: 5px;
+  padding: 2px 7px;
+  letter-spacing: .02em;
+}
+
+.card-name {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--text-1);
+  margin-bottom: 7px;
+  padding-right: 52px;
+  line-height: 1.4;
+}
+.card.self-made .card-name { color: var(--blue); }
+
+.card-desc {
+  font-size: 12.5px;
+  color: var(--text-2);
+  line-height: 1.6;
+  margin-bottom: 12px;
+}
+
+.card-foot {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.cat-tag {
+  display: none;
+  font-size: 10.5px;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: 5px;
+  flex-shrink: 0;
+}
+body.show-tags .cat-tag { display: inline-block; }
+
+.card-meta {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-left: auto;
+  font-size: 11px;
+  color: var(--text-3);
+}
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.meta-sep { color: var(--border); }
+
+/* ─── EMPTY ─── */
+.empty-state {
+  display: none;
+  padding: 80px 0;
+  text-align: center;
+  color: var(--text-3);
+  font-size: 13px;
+}
+.empty-state p { margin-top: 8px; }
+
+/* ─── STATS ROW ─── */
+.stats-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+}
+
+.stat-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 18px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.stat-n {
+  font-family: var(--font-mono);
+  font-size: 20px;
+  font-weight: 500;
+  color: var(--text-1);
+  line-height: 1;
+}
+.stat-n.blue { color: var(--blue); }
+
+.stat-l {
+  font-size: 11px;
+  color: var(--text-3);
+}
+
+/* ─── CATEGORY COLORS ─── */
+.dot-设计   { background: #f97316; }
+.dot-工具   { background: #22c55e; }
+.dot-文档   { background: #8b5cf6; }
+.dot-求职   { background: #ef4444; }
+.dot-元工具 { background: #94a3b8; }
+
+.pip-self    { background: var(--blue); }
+.pip-install { background: #d4d4d0; }
+
+.tag-设计   { background: #fff7ed; color: #c2410c; }
+.tag-工具   { background: #f0fdf4; color: #15803d; }
+.tag-文档   { background: #f5f3ff; color: #7c3aed; }
+.tag-求职   { background: #fff1f2; color: #be123c; }
+.tag-元工具 { background: #f8fafc; color: #475569; border: 1px solid #e2e8f0; }
+
+/* scrollbar */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-thumb { background: #ddd; border-radius: 4px; }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<nav class="topbar">
+  <div class="logo">
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="6" height="6" rx="1.5" fill="currentColor"/><rect x="9" y="1" width="6" height="6" rx="1.5" fill="currentColor" opacity=".4"/><rect x="1" y="9" width="6" height="6" rx="1.5" fill="currentColor" opacity=".4"/><rect x="9" y="9" width="6" height="6" rx="1.5" fill="currentColor"/></svg>
+    <span>Claude Code</span>
+    <span class="logo-sep">/</span>
+    <span>skills</span>
+  </div>
+
+  <div class="search-wrap">
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6">
+      <circle cx="6.5" cy="6.5" r="5"/><path d="m10 10 4 4" stroke-linecap="round"/>
+    </svg>
+    <input id="search" type="text" placeholder="搜索名称或功能描述…" autocomplete="off" spellcheck="false">
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" data-cat="all">全部</button>
+    <button class="tab" data-cat="设计">设计</button>
+    <button class="tab" data-cat="工具">工具</button>
+    <button class="tab" data-cat="文档">文档</button>
+    <button class="tab" data-cat="求职">求职</button>
+    <button class="tab" data-cat="元工具">元工具</button>
+  </div>
+</nav>
+
+<!-- LAYOUT -->
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">分类</div>
+      <button class="sidebar-item active" data-cat="all">
+        <span class="sidebar-item-left">全部</span>
+        <span class="count-pill" id="sb-all">61</span>
+      </button>
+      <button class="sidebar-item" data-cat="设计">
+        <span class="sidebar-item-left">
+          <span class="sidebar-dot dot-设计"></span>设计
+        </span>
+        <span class="count-pill" id="sb-设计">24</span>
+      </button>
+      <button class="sidebar-item" data-cat="工具">
+        <span class="sidebar-item-left">
+          <span class="sidebar-dot dot-工具"></span>工具
+        </span>
+        <span class="count-pill" id="sb-工具">10</span>
+      </button>
+      <button class="sidebar-item" data-cat="文档">
+        <span class="sidebar-item-left">
+          <span class="sidebar-dot dot-文档"></span>文档
+        </span>
+        <span class="count-pill" id="sb-文档">7</span>
+      </button>
+      <button class="sidebar-item" data-cat="求职">
+        <span class="sidebar-item-left">
+          <span class="sidebar-dot dot-求职"></span>求职
+        </span>
+        <span class="count-pill" id="sb-求职">2</span>
+      </button>
+      <button class="sidebar-item" data-cat="元工具">
+        <span class="sidebar-item-left">
+          <span class="sidebar-dot dot-元工具"></span>元工具
+        </span>
+        <span class="count-pill" id="sb-元工具">19</span>
+      </button>
+    </div>
+
+    <div class="legend-wrap">
+      <div class="sidebar-label" style="padding:0;margin-bottom:10px;">来源</div>
+      <div class="legend-row">
+        <div class="legend-pip pip-self"></div>
+        <span>自制（自己写的）</span>
+      </div>
+      <div class="legend-row">
+        <div class="legend-pip pip-install"></div>
+        <span>安装（npx / clone）</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- CONTENT -->
+  <main class="content">
+
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-n" id="stat-total">61</div>
+        <div class="stat-l">已安装</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-n">5</div>
+        <div class="stat-l">分类</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-n blue">2</div>
+        <div class="stat-l">自制</div>
+      </div>
+    </div>
+
+    <div class="empty-state" id="empty">
+      <svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.2" viewBox="0 0 24 24" opacity=".3"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35" stroke-linecap="round"/></svg>
+      <p>没有匹配的 skill</p>
+    </div>
+
+    <div class="section" data-section="设计">
+      <div class="section-head">
+        <span class="section-title">设计</span>
+        <span class="section-en">Frontend &amp; Visual</span>
+        <span class="section-cnt" id="cnt-设计"></span>
+      </div>
+      <div class="grid" id="grid-设计"></div>
+    </div>
+
+    <div class="section" data-section="工具">
+      <div class="section-head">
+        <span class="section-title">工具</span>
+        <span class="section-en">Utilities</span>
+        <span class="section-cnt" id="cnt-工具"></span>
+      </div>
+      <div class="grid" id="grid-工具"></div>
+    </div>
+
+    <div class="section" data-section="文档">
+      <div class="section-head">
+        <span class="section-title">文档</span>
+        <span class="section-en">Documents &amp; Portfolio</span>
+        <span class="section-cnt" id="cnt-文档"></span>
+      </div>
+      <div class="grid" id="grid-文档"></div>
+    </div>
+
+    <div class="section" data-section="求职">
+      <div class="section-head">
+        <span class="section-title">求职</span>
+        <span class="section-en">Job Search</span>
+        <span class="section-cnt" id="cnt-求职"></span>
+      </div>
+      <div class="grid" id="grid-求职"></div>
+    </div>
+
+    <div class="section" data-section="元工具">
+      <div class="section-head">
+        <span class="section-title">元工具</span>
+        <span class="section-en">Claude Code Meta</span>
+        <span class="section-cnt" id="cnt-元工具"></span>
+      </div>
+      <div class="grid" id="grid-元工具"></div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+// 安装日期（文件系统 birthtime）
+const installDates = {
+  'auto-claude-memory':'2026-04-07','brandkit':'2026-06-08','cover-design-open':'2026-05-27',
+  'design-taste-frontend-v1':'2026-06-08','design-taste-frontend':'2026-06-08',
+  'doc-coauthoring':'2026-04-07','docx':'2026-04-07','figma-to-pdf':'2026-05-17',
+  'find-skills':'2026-03-17','frontend-design':'2026-03-17','frontend-slides':'2026-04-08',
+  'frontend-ui-ux-engineer':'2026-03-19','full-output-enforcement':'2026-06-08',
+  'gemini-watermark-remover':'2026-04-14','gpt-taste':'2026-06-08',
+  'graphic-content-creation':'2026-04-04','high-end-visual-design':'2026-06-08',
+  'image-to-code':'2026-06-08','imagegen-frontend-mobile':'2026-06-08',
+  'imagegen-frontend-web':'2026-06-08','impeccable':'2026-06-08',
+  'industrial-brutalist-ui':'2026-06-08','karpathy-guidelines':'2026-05-26',
+  'minimalist-ui':'2026-06-08','pdf':'2026-04-07','planning-with-files':'2026-04-07',
+  'portfolio-design':'2026-04-11','pptx':'2026-04-07','pua':'2026-04-07',
+  'redesign-existing-projects':'2026-06-08','resume-bullet-writer':'2026-04-20',
+  'resume-tailor':'2026-04-20','skill-creator':'2026-03-17','stable-design':'2026-04-04',
+  'stitch-design-taste':'2026-06-08','threejs-shaders':'2026-03-19',
+  'ui-ux-pro-max':'2026-03-17','using-superpowers':'2026-04-06','ux-review':'2026-03-29',
+  'video-transcript-downloader':'2026-04-07','voice-debrief':'2026-05-26',
+  'web-design-guidelines':'2026-03-17','web-to-design-md':'2026-06-09',
+  'xiaohongshu-note-analyzer':'2026-04-20','xlsx':'2026-04-07','youtube-transcript':'2026-04-07',
+};
+
+// 使用次数（从 ~/.claude/projects session 日志统计）
+const usageCounts = {
+  'find-skills':9,'interview-debrief':6,'voice-debrief':5,'frontend-design':4,
+  'save-to-feishu':3,'video-transcript-downloader':2,'figma-to-pdf':2,
+  'web-design-guidelines':1,'skill-creator':1,'cover-design-open':1,
+};
+
+const skills = [
+  { name:'frontend-design',           cat:'设计',  self:false, desc:'给出网页、组件需求，生成有设计感的高质量前端代码',
+    kw:'网页 页面 组件 前端 界面 UI 代码 开发 样式 美化' },
+  { name:'frontend-slides',           cat:'设计',  self:false, desc:'用 HTML/CSS 制作演示幻灯片，支持动效和自定义主题',
+    kw:'幻灯片 PPT 演示 汇报 展示 动画' },
+  { name:'frontend-ui-ux-engineer',   cat:'设计',  self:false, desc:'兼顾 UI 实现与 UX 逻辑的全栈前端工程角色',
+    kw:'交互 体验 用户 工程师 实现' },
+  { name:'high-end-visual-design',    cat:'设计',  self:false, desc:'生成奢华感、精致感较强的视觉设计稿',
+    kw:'高端 奢华 精致 视觉 品质 质感' },
+  { name:'image-to-code',             cat:'设计',  self:false, desc:'截图或设计稿转 HTML/CSS/React 代码',
+    kw:'截图 图片 还原 转换 识别 像素' },
+  { name:'imagegen-frontend-mobile',  cat:'设计',  self:false, desc:'生成移动端界面配图或 UI 概念图',
+    kw:'手机 APP 移动端 配图 概念 iOS Android' },
+  { name:'imagegen-frontend-web',     cat:'设计',  self:false, desc:'生成 Web 端界面配图或 UI 概念图',
+    kw:'网页 Web 配图 概念图 效果图' },
+  { name:'industrial-brutalist-ui',   cat:'设计',  self:false, desc:'工业感/野兽派风格 UI，硬边框、高对比、无圆角',
+    kw:'野兽派 brutalist 工业 硬朗 粗犷 特立独行 风格' },
+  { name:'minimalist-ui',             cat:'设计',  self:false, desc:'极简主义 UI，大留白、少颜色、内容优先',
+    kw:'极简 简洁 留白 清爽 少 干净' },
+  { name:'stable-design',             cat:'设计',  self:false, desc:'生成稳定、可复用的设计输出，减少随机性',
+    kw:'稳定 一致 复用 组件 规范' },
+  { name:'ui-ux-pro-max',             cat:'设计',  self:false, desc:'高阶 UI/UX 综合能力，适合复杂产品场景',
+    kw:'专业 产品 复杂 高阶 用户体验' },
+  { name:'web-design-guidelines',     cat:'设计',  self:false, desc:'检查代码是否符合 Vercel Web Interface Guidelines',
+    kw:'规范 检查 审查 无障碍 可访问性 标准' },
+  { name:'web-to-design-md',          cat:'设计',  self:false, desc:'给一个网址，自动抓取并逆向工程成 DESIGN.md 设计规范',
+    kw:'网站 分析 提取 样式 设计系统 逆向 抓取 URL' },
+  { name:'stitch-design-taste',       cat:'设计',  self:false, desc:'Stitch 平台风格设计，适合 AI 产品配图',
+    kw:'AI 产品 stitch 配图 风格' },
+  { name:'gpt-taste',                 cat:'设计',  self:false, desc:'GPT/OpenAI 风格的设计语言，简洁深色系',
+    kw:'OpenAI GPT 深色 黑色 简洁 风格' },
+  { name:'graphic-content-creation',  cat:'设计',  self:false, desc:'图形内容创作，包括海报、封面、图文排版等',
+    kw:'海报 封面 图文 排版 平面 创意 图形' },
+  { name:'impeccable',                cat:'设计',  self:false, desc:'要求极高品质的设计输出，细节做到位',
+    kw:'完美 高品质 精细 打磨 细节' },
+  { name:'design-taste-frontend',     cat:'设计',  self:false, desc:'有设计品味的前端代码，注重视觉感受',
+    kw:'品味 好看 审美 颜值 视觉' },
+  { name:'design-taste-frontend-v1',  cat:'设计',  self:false, desc:'design-taste-frontend 的早期版本',
+    kw:'品味 审美 旧版 v1' },
+  { name:'anker-design-system-skill', cat:'设计',  self:false, desc:'Anker 移动端设计系统参考，生成符合品牌规范的 UI 组件',
+    kw:'Anker 安克 品牌 组件库 规范 移动 手机' },
+  { name:'brandkit',                  cat:'设计',  self:false, desc:'品牌套件生成，包含色板、字体等基础元素',
+    kw:'品牌 logo 色彩 字体 标识 VI' },
+  { name:'redesign-existing-projects',cat:'设计',  self:false, desc:'对已有页面进行视觉重设计，保留结构改变风格',
+    kw:'重设计 改版 视觉 升级 优化 改造' },
+  { name:'threejs-shaders',           cat:'设计',  self:false, desc:'Three.js GLSL 着色器，粒子/流体/光效等',
+    kw:'3D 粒子 动效 光效 着色器 shader 流体 webgl' },
+  { name:'cover-design-open',         cat:'设计',  self:false, desc:'开放式封面设计，适合文章、案例、发布物封面图',
+    kw:'封面 头图 文章 发布 案例 小红书 公众号' },
+
+  { name:'figma-to-pdf',              cat:'工具',  self:true,  desc:'把 Figma 设计稿或本地图片导出为高清 PDF，支持多页拼接、尺寸控制',
+    kw:'figma 导出 PDF 打印 作品集 高清 合并 拼接' },
+  { name:'voice-debrief',             cat:'工具',  self:true,  desc:'面试录音转译复盘：上传音频自动转文字，整理问答、生成总评，保存到飞书',
+    kw:'面试 录音 转录 复盘 语音 音频 总结 飞书 问答' },
+  { name:'interview-debrief',         cat:'工具',  self:false, desc:'面试复盘助手，分析回答质量、给出改进建议',
+    kw:'面试 复盘 回答 准备 求职 改进' },
+  { name:'ux-review',                 cat:'工具',  self:false, desc:'UX 走查，逐项检查可用性问题并给出优先级建议',
+    kw:'走查 用户体验 UX 可用性 问题 检查 评审' },
+  { name:'video-transcript-downloader',cat:'工具', self:false, desc:'下载 YouTube 或其他视频的字幕/转录文本',
+    kw:'视频 字幕 下载 YouTube 转录 文字 B站' },
+  { name:'youtube-transcript',        cat:'工具',  self:false, desc:'获取 YouTube 视频转录文本，快速提取内容要点',
+    kw:'YouTube 视频 转录 字幕 摘要 提取' },
+  { name:'save-to-feishu',            cat:'工具',  self:false, desc:'将内容保存到飞书文档，支持自定义目录和格式',
+    kw:'飞书 保存 文档 同步 整理' },
+  { name:'xiaohongshu-note-analyzer', cat:'工具',  self:false, desc:'分析小红书笔记结构，提取爆款规律和文案模式',
+    kw:'小红书 笔记 爆款 文案 分析 种草 博主' },
+  { name:'gemini-watermark-remover',  cat:'工具',  self:false, desc:'调用 Gemini 去除图片水印',
+    kw:'水印 去除 图片 处理 Gemini' },
+  { name:'pua',                       cat:'工具',  self:false, desc:'来源未知，用途待确认',
+    kw:'' },
+
+  { name:'portfolio-design',          cat:'文档',  self:false, desc:'生成深色系作品集案例页面，含设计系统、叙事结构、组件规范',
+    kw:'作品集 portfolio 案例 展示 求职 设计师 深色' },
+  { name:'doc-coauthoring',           cat:'文档',  self:false, desc:'文档协作辅助，帮助梳理结构、补全内容、统一风格',
+    kw:'文档 协作 写作 结构 整理 规范 内容' },
+  { name:'docx',                      cat:'文档',  self:false, desc:'生成 .docx Word 文档，支持标题、表格、样式等',
+    kw:'Word 文档 docx 生成 报告 表格' },
+  { name:'pdf',                       cat:'文档',  self:false, desc:'生成 PDF 文档，适合报告、规范、说明书等',
+    kw:'PDF 文档 生成 报告 说明书 导出' },
+  { name:'pptx',                      cat:'文档',  self:false, desc:'生成 PowerPoint 演示文件，含布局和内容',
+    kw:'PPT PowerPoint 幻灯片 演示 汇报 pptx' },
+  { name:'xlsx',                      cat:'文档',  self:false, desc:'生成 Excel 表格，适合数据整理和统计',
+    kw:'Excel 表格 数据 统计 xlsx 电子表格' },
+  { name:'planning-with-files',       cat:'文档',  self:false, desc:'结合本地文件进行项目规划，读取上下文后给出执行计划',
+    kw:'规划 计划 项目 执行 步骤 文件' },
+
+  { name:'resume-bullet-writer',      cat:'求职',  self:false, desc:'将经历描述改写为 STAR 结构的简历 bullet，量化结果、突出影响',
+    kw:'简历 履历 经历 改写 量化 STAR bullet 求职' },
+  { name:'resume-tailor',             cat:'求职',  self:false, desc:'针对特定 JD 定制简历，匹配关键词、调整侧重点',
+    kw:'简历 JD 定制 匹配 关键词 投递 岗位 求职' },
+
+  { name:'auto-claude-memory',        cat:'元工具', self:false, desc:'自动把对话中的关键信息写入持久记忆，跨会话保留上下文',
+    kw:'记忆 记住 上下文 持久 会话 历史' },
+  { name:'find-skills',               cat:'元工具', self:false, desc:'当你说"我想做 X"时，找到合适的已安装 skill 或建议安装新的',
+    kw:'找 推荐 发现 skill 安装 建议' },
+  { name:'skill-creator',             cat:'元工具', self:false, desc:'引导创建新 skill，生成 SKILL.md 文件结构',
+    kw:'创建 新建 skill 自制 定制' },
+  { name:'update-config',             cat:'元工具', self:false, desc:'修改 Claude Code 的 settings.json，配置 hooks、权限、环境变量',
+    kw:'配置 设置 settings hooks 权限 环境变量' },
+  { name:'keybindings-help',          cat:'元工具', self:false, desc:'自定义 Claude Code 快捷键，修改 ~/.claude/keybindings.json',
+    kw:'快捷键 键盘 绑定 热键 shortcut' },
+  { name:'fewer-permission-prompts',  cat:'元工具', self:false, desc:'把常用只读操作加入白名单，减少权限弹窗',
+    kw:'权限 弹窗 白名单 自动 允许' },
+  { name:'code-review',               cat:'元工具', self:false, desc:'审查当前分支代码，找出 bug、重复逻辑；支持 --fix 自动修复',
+    kw:'代码审查 review bug 错误 重构 修复 质量' },
+  { name:'simplify',                  cat:'元工具', self:false, desc:'对已改动代码做简化重构，提升代码质量',
+    kw:'简化 重构 优化 精简 代码质量' },
+  { name:'security-review',           cat:'元工具', self:false, desc:'安全审查，检查注入、权限、敏感信息泄露等问题',
+    kw:'安全 漏洞 注入 XSS 权限 泄露 扫描' },
+  { name:'verify',                    cat:'元工具', self:false, desc:'运行应用验证改动是否符合预期，手动测试并确认',
+    kw:'验证 测试 确认 运行 检验 回归' },
+  { name:'review',                    cat:'元工具', self:false, desc:'Review Pull Request，汇总改动、提出意见',
+    kw:'PR 审查 合并 代码 评论 意见' },
+  { name:'loop',                      cat:'元工具', self:false, desc:'让某命令或 skill 按间隔重复执行，适合轮询任务',
+    kw:'循环 定时 重复 轮询 自动 间隔' },
+  { name:'schedule',                  cat:'元工具', self:false, desc:'创建定时任务，在指定时间自动执行 Claude Code 命令',
+    kw:'定时 计划 任务 自动化 cron 预约' },
+  { name:'claude-api',                cat:'元工具', self:false, desc:'Claude API / Anthropic SDK 参考，含模型 ID、定价、参数说明',
+    kw:'API 文档 模型 定价 SDK Anthropic 接口 参数' },
+  { name:'run',                       cat:'元工具', self:false, desc:'启动并运行当前项目，自动识别项目类型',
+    kw:'启动 运行 执行 项目 start serve' },
+  { name:'init',                      cat:'元工具', self:false, desc:'初始化新项目，生成基础结构和配置文件',
+    kw:'初始化 新建 脚手架 项目 创建' },
+  { name:'using-superpowers',         cat:'元工具', self:false, desc:'介绍 Claude Code 的高级能力，帮助充分利用各类工具',
+    kw:'教程 入门 功能 使用 技巧 介绍' },
+  { name:'karpathy-guidelines',       cat:'元工具', self:false, desc:'基于 Karpathy 编程理念的代码规范：简洁、务实、不过度工程化',
+    kw:'规范 编程 最佳实践 简洁 工程 Karpathy' },
+  { name:'full-output-enforcement',   cat:'元工具', self:false, desc:'强制 Claude 输出完整内容，防止截断或省略',
+    kw:'完整 截断 省略 输出 强制 全部' },
+];
+
+const cats = ['设计','工具','文档','求职','元工具'];
+
+// Build grids
+cats.forEach(cat => {
+  const grid = document.getElementById('grid-' + cat);
+  skills.filter(s => s.cat === cat).forEach(s => grid.appendChild(makeCard(s)));
+});
+
+function makeCard(s) {
+  const el = document.createElement('div');
+  el.className = 'card' + (s.self ? ' self-made' : '');
+  el.dataset.name = s.name;
+  el.dataset.cat = s.cat;
+
+  const date = installDates[s.name] || '';
+  const uses = usageCounts[s.name] || 0;
+  const dateStr = date ? date.slice(5).replace('-', '/') : '—'; // "06/08"
+  const usesStr = `${uses} 次`;
+
+  el.innerHTML =
+    (s.self ? '<span class="self-badge">自制</span>' : '') +
+    `<div class="card-name">/${s.name}</div>` +
+    `<div class="card-desc">${s.desc}</div>` +
+    `<div class="card-foot">
+      <span class="cat-tag tag-${s.cat}">${s.cat}</span>
+      <span class="card-meta">
+        <span class="meta-item" title="安装日期">
+          <svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="1" y="2" width="10" height="9" rx="1.5"/><path d="M4 1v2M8 1v2M1 5h10" stroke-linecap="round"/></svg>
+          ${dateStr}
+        </span>
+        <span class="meta-sep">·</span>
+        <span class="meta-item" title="使用次数">
+          <svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M6 1v5l3 2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="6" cy="6" r="5"/></svg>
+          ${usesStr}
+        </span>
+      </span>
+    </div>`;
+  return el;
+}
+
+// Fuse — 搜索 name + desc + kw，name 权重更高
+const fuse = new Fuse(skills, {
+  keys: [
+    { name:'name', weight: 0.4 },
+    { name:'desc', weight: 0.35 },
+    { name:'kw',   weight: 0.25 },
+  ],
+  threshold: 0.38,
+  minMatchCharLength: 1,
+  ignoreLocation: true,   // 不限制匹配位置，对中文更友好
+});
+
+// 辅助：简单 substring 匹配（name + desc + kw 任一包含即命中）
+function substringMatch(s, q) {
+  const h = (s.name + ' ' + s.desc + ' ' + (s.kw || '')).toLowerCase();
+  return q.split(/\s+/).every(token => h.includes(token));
+}
+
+// State
+let activeTab = 'all';
+const searchEl = document.getElementById('search');
+
+// Tab clicks — topbar
+document.querySelectorAll('.topbar .tab').forEach(t => {
+  t.addEventListener('click', () => {
+    setTab(t.dataset.cat);
+    filter();
+  });
+});
+
+// Sidebar clicks
+document.querySelectorAll('.sidebar-item').forEach(t => {
+  t.addEventListener('click', () => {
+    setTab(t.dataset.cat);
+    filter();
+  });
+});
+
+function setTab(cat) {
+  activeTab = cat;
+  document.querySelectorAll('.tab').forEach(t =>
+    t.classList.toggle('active', t.dataset.cat === cat));
+  document.querySelectorAll('.sidebar-item').forEach(t =>
+    t.classList.toggle('active', t.dataset.cat === cat));
+}
+
+searchEl.addEventListener('input', filter);
+
+document.addEventListener('keydown', e => {
+  if (e.key === '/' && document.activeElement !== searchEl) {
+    e.preventDefault(); searchEl.focus();
+  }
+  if (e.key === 'Escape') { searchEl.value = ''; filter(); searchEl.blur(); }
+});
+
+function filter() {
+  const q = searchEl.value.trim();
+  let matchedNames = null;
+  if (q) {
+    const ql = q.toLowerCase();
+    // Fuse 模糊结果
+    const fuseHits = new Set(fuse.search(q).map(r => r.item.name));
+    // substring 直接匹配（OR 合并，弥补 Fuse 对中文短词的漏判）
+    skills.forEach(s => { if (substringMatch(s, ql)) fuseHits.add(s.name); });
+    matchedNames = fuseHits;
+  }
+
+  const needTags = activeTab === 'all' || !!q;
+  document.body.classList.toggle('show-tags', needTags);
+
+  let total = 0;
+  const catCounts = {};
+
+  cats.forEach(cat => {
+    const section = document.querySelector('[data-section="' + cat + '"]');
+    let vis = 0;
+    section.querySelectorAll('.card').forEach(c => {
+      const show = (activeTab === 'all' || c.dataset.cat === activeTab)
+                && (!matchedNames || matchedNames.has(c.dataset.name));
+      c.classList.toggle('hidden', !show);
+      if (show) { vis++; total++; }
+    });
+    section.classList.toggle('hidden', vis === 0);
+    catCounts[cat] = vis;
+    const cntEl = document.getElementById('cnt-' + cat);
+    if (cntEl) cntEl.textContent = vis;
+    const sbEl = document.getElementById('sb-' + cat);
+    if (sbEl) sbEl.textContent = vis;
+  });
+
+  document.getElementById('stat-total').textContent = total;
+  document.getElementById('sb-all').textContent = total;
+  document.getElementById('empty').style.display = total === 0 ? 'block' : 'none';
+}
+
+// Init counts
+filter();
+</script>
+</body>
+</html>
