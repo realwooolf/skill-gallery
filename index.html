@@ -551,32 +551,28 @@ body.show-tags .cat-tag { display: inline-block; }
 <script>
 // 安装日期（文件系统 birthtime）
 const installDates = {
-  'auto-claude-memory':'2026-04-07','brandkit':'2026-06-08','cover-design-open':'2026-05-27',
-  'design-taste-frontend-v1':'2026-06-08','design-taste-frontend':'2026-06-08',
-  'doc-coauthoring':'2026-04-07','docx':'2026-04-07','figma-to-pdf':'2026-05-17',
-  'find-skills':'2026-03-17','frontend-design':'2026-03-17','frontend-slides':'2026-04-08',
-  'frontend-ui-ux-engineer':'2026-03-19','full-output-enforcement':'2026-06-08',
-  'gemini-watermark-remover':'2026-04-14','gpt-taste':'2026-06-08',
-  'graphic-content-creation':'2026-04-04','high-end-visual-design':'2026-06-08',
-  'image-to-code':'2026-06-08','imagegen-frontend-mobile':'2026-06-08',
-  'imagegen-frontend-web':'2026-06-08','impeccable':'2026-06-08',
-  'industrial-brutalist-ui':'2026-06-08','karpathy-guidelines':'2026-05-26',
-  'minimalist-ui':'2026-06-08','pdf':'2026-04-07','planning-with-files':'2026-04-07',
-  'portfolio-design':'2026-04-11','pptx':'2026-04-07','pua':'2026-04-07',
-  'redesign-existing-projects':'2026-06-08','resume-bullet-writer':'2026-04-20',
-  'resume-tailor':'2026-04-20','skill-creator':'2026-03-17','stable-design':'2026-04-04',
-  'stitch-design-taste':'2026-06-08','threejs-shaders':'2026-03-19',
-  'ui-ux-pro-max':'2026-03-17','using-superpowers':'2026-04-06','ux-review':'2026-03-29',
-  'video-transcript-downloader':'2026-04-07','voice-debrief':'2026-05-26',
-  'web-design-guidelines':'2026-03-17','web-to-design-md':'2026-06-09',
-  'xiaohongshu-note-analyzer':'2026-04-20','xlsx':'2026-04-07','youtube-transcript':'2026-04-07',
+  'figma-to-pdf':'2026-05-17',
+  'find-skills':'2026-03-17',
+  'frontend-design':'2026-03-17',
+  'portfolio-design':'2026-04-11',
+  'ux-review':'2026-03-29',
+  'web-to-design-md':'2026-06-09',
 };
 
 // 使用次数（从 ~/.claude/projects session 日志统计）
 const usageCounts = {
-  'find-skills':9,'interview-debrief':6,'voice-debrief':5,'frontend-design':4,
-  'save-to-feishu':3,'video-transcript-downloader':2,'figma-to-pdf':2,
-  'web-design-guidelines':1,'skill-creator':1,'cover-design-open':1,
+  'skill-creator':1,
+  'find-skills':9,
+  'web-design-guidelines':1,
+  'figma-to-pdf':2,
+  'cover-design-open':1,
+  'interview-debrief':6,
+  'pdf-compress':1,
+  'save-to-feishu':3,
+  'frontend-design':4,
+  'voice-debrief':5,
+  'images-to-pdf':2,
+  'video-transcript-downloader':2,
 };
 
 const skills = [
