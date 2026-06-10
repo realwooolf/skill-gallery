@@ -391,6 +391,76 @@ body.show-tags .cat-tag { display: inline-block; }
 /* scrollbar */
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-thumb { background: #ddd; border-radius: 4px; }
+
+/* ─── MOBILE ─── */
+@media (max-width: 680px) {
+  /* topbar: logo + search stacked, tabs hidden (replaced by mobile-tabs) */
+  .topbar {
+    padding: 0 16px;
+    height: auto;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding-top: 12px;
+    padding-bottom: 12px;
+  }
+  .logo { font-size: 12px; }
+  .search-wrap { max-width: 100%; order: 3; flex: 0 0 100%; }
+  .tabs { display: none; }
+
+  /* mobile category tabs — horizontal scroll strip */
+  .mobile-tabs {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    padding: 10px 16px;
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .mobile-tabs::-webkit-scrollbar { display: none; }
+  .mobile-tabs .tab {
+    height: 30px;
+    padding: 0 13px;
+    font-size: 12px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    border-radius: 20px;
+    flex-shrink: 0;
+    color: var(--text-2);
+  }
+  .mobile-tabs .tab.active {
+    background: var(--text-1);
+    color: #fff;
+    border-color: var(--text-1);
+  }
+
+  /* hide sidebar */
+  .sidebar { display: none; }
+  .layout { grid-template-columns: 1fr; }
+
+  /* content */
+  .content { padding: 20px 16px 48px; }
+
+  /* stats row: compact */
+  .stats-row { gap: 6px; margin-bottom: 20px; }
+  .stat-card { padding: 10px 14px; }
+  .stat-n { font-size: 17px; }
+  .stat-l { font-size: 10px; }
+
+  /* grid: 1 column */
+  .grid { grid-template-columns: 1fr; gap: 8px; }
+
+  /* section header */
+  .section { margin-bottom: 28px; }
+  .section-head { margin-bottom: 10px; }
+  .section-title { font-size: 14px; }
+
+  /* card */
+  .card { padding: 14px; }
+  .card-name { font-size: 12px; }
+  .card-desc { font-size: 12px; }
+}
 </style>
 </head>
 <body>
@@ -420,6 +490,16 @@ body.show-tags .cat-tag { display: inline-block; }
     <button class="tab" data-cat="元工具">元工具</button>
   </div>
 </nav>
+
+<!-- MOBILE TABS -->
+<div class="mobile-tabs">
+  <button class="tab active" data-cat="all">全部</button>
+  <button class="tab" data-cat="设计">设计</button>
+  <button class="tab" data-cat="工具">工具</button>
+  <button class="tab" data-cat="文档">文档</button>
+  <button class="tab" data-cat="求职">求职</button>
+  <button class="tab" data-cat="元工具">元工具</button>
+</div>
 
 <!-- LAYOUT -->
 <div class="layout">
@@ -790,6 +870,9 @@ function setTab(cat) {
     t.classList.toggle('active', t.dataset.cat === cat));
   document.querySelectorAll('.sidebar-item').forEach(t =>
     t.classList.toggle('active', t.dataset.cat === cat));
+  // scroll active mobile tab into view
+  const mobileActive = document.querySelector('.mobile-tabs .tab.active');
+  if (mobileActive) mobileActive.scrollIntoView({ inline: 'center', behavior: 'smooth' });
 }
 
 searchEl.addEventListener('input', filter);
