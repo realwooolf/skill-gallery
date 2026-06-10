@@ -392,31 +392,35 @@ body.show-tags .cat-tag { display: inline-block; }
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-thumb { background: #ddd; border-radius: 4px; }
 
+/* mobile-tabs 默认隐藏，只在手机显示 */
+.mobile-tabs { display: none; }
+
 /* ─── MOBILE ─── */
 @media (max-width: 680px) {
-  /* topbar: logo + search stacked, tabs hidden (replaced by mobile-tabs) */
+  /* topbar */
   .topbar {
-    padding: 0 16px;
+    padding: 12px 16px;
     height: auto;
     flex-wrap: wrap;
-    gap: 10px;
-    padding-top: 12px;
-    padding-bottom: 12px;
+    gap: 8px;
   }
   .logo { font-size: 12px; }
-  .search-wrap { max-width: 100%; order: 3; flex: 0 0 100%; }
+  .search-wrap { order: 3; max-width: 100%; flex: 0 0 100%; }
   .tabs { display: none; }
 
-  /* mobile category tabs — horizontal scroll strip */
+  /* mobile category tabs */
   .mobile-tabs {
     display: flex;
     gap: 6px;
     overflow-x: auto;
-    padding: 10px 16px;
+    padding: 8px 16px;
     background: var(--white);
     border-bottom: 1px solid var(--border);
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
+    position: sticky;
+    top: 88px;
+    z-index: 15;
   }
   .mobile-tabs::-webkit-scrollbar { display: none; }
   .mobile-tabs .tab {
@@ -435,31 +439,33 @@ body.show-tags .cat-tag { display: inline-block; }
     border-color: var(--text-1);
   }
 
-  /* hide sidebar */
+  /* layout: hide sidebar, full width */
   .sidebar { display: none; }
   .layout { grid-template-columns: 1fr; }
 
   /* content */
-  .content { padding: 20px 16px 48px; }
+  .content { padding: 16px 16px 48px; }
 
-  /* stats row: compact */
-  .stats-row { gap: 6px; margin-bottom: 20px; }
+  /* stats */
+  .stats-row { gap: 6px; margin-bottom: 16px; }
   .stat-card { padding: 10px 14px; }
   .stat-n { font-size: 17px; }
   .stat-l { font-size: 10px; }
 
-  /* grid: 1 column */
+  /* grid: single column */
   .grid { grid-template-columns: 1fr; gap: 8px; }
 
-  /* section header */
-  .section { margin-bottom: 28px; }
+  /* section */
+  .section { margin-bottom: 24px; }
   .section-head { margin-bottom: 10px; }
   .section-title { font-size: 14px; }
+  .section-en { display: none; }
 
   /* card */
-  .card { padding: 14px; }
+  .card { padding: 13px 14px; }
   .card-name { font-size: 12px; }
-  .card-desc { font-size: 12px; }
+  .card-desc { font-size: 12px; margin-bottom: 8px; }
+  .card-meta { font-size: 10px; }
 }
 </style>
 </head>
