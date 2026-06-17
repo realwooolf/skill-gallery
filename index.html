@@ -729,6 +729,8 @@ const skills = [
     kw:'小红书 笔记 爆款 文案 分析 种草 博主' },
   { name:'gemini-watermark-remover',  cat:'工具',  self:false, desc:'调用 Gemini 去除图片水印',
     kw:'水印 去除 图片 处理 Gemini' },
+  { name:'image-prompt',              cat:'工具',  self:true,  desc:'帮你写图像生成提示词（Midjourney / DALL-E 等），拆参考图维度，控制风格迁移范围',
+    kw:'图像 生成 提示词 Midjourney DALL-E 参考图 配色 笔触 风格 迁移 插图' },
   { name:'pua',                       cat:'工具',  self:false, desc:'来源未知，用途待确认',
     kw:'' },
 
@@ -760,6 +762,8 @@ const skills = [
     kw:'创建 新建 skill 自制 定制' },
   { name:'update-config',             cat:'元工具', self:false, desc:'修改 Claude Code 的 settings.json，配置 hooks、权限、环境变量',
     kw:'配置 设置 settings hooks 权限 环境变量' },
+  { name:'task-brief',                cat:'元工具', self:true,  desc:'任务信息不足时用 TCREI 框架识别缺失维度并追问，也可主动调用补全任务描述',
+    kw:'任务 提示词 TCREI 框架 补全 追问 背景 上下文 需求 描述' },
   { name:'keybindings-help',          cat:'元工具', self:false, desc:'自定义 Claude Code 快捷键，修改 ~/.claude/keybindings.json',
     kw:'快捷键 键盘 绑定 热键 shortcut' },
   { name:'fewer-permission-prompts',  cat:'元工具', self:false, desc:'把常用只读操作加入白名单，减少权限弹窗',
